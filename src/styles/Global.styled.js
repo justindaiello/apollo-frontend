@@ -6,6 +6,10 @@ const GlobalStyle = createGlobalStyle`
   ${reboot}
 
   /* TODO: Add global styling */
+
+  body {
+    background: ${({ theme }) => theme.darkBlue};
+  }
 `;
 
 export default GlobalStyle;
