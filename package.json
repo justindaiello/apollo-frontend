@@ -14,7 +14,8 @@
     "react-apollo": "^3.1.5",
     "react-dom": "17.0.0",
     "react-scripts": "3.4.3",
-    "styled-components": "^5.2.1"
+    "styled-components": "^5.2.1",
+    "styled-reboot": "^5.0.0"
   },
   "devDependencies": {
     "typescript": "3.8.3"
