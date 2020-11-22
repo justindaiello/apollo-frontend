@@ -1,11 +1,12 @@
-import React from 'react';
+import React from "react";
 
-import AppProviders from './context/AppProviders';
+import Dashboard from "./modules/Dashboard";
+import AppProviders from "./context/AppProviders";
 
 export default function App() {
   return (
     <AppProviders>
-      <p>Link Shortener App</p>
+      <Dashboard />
     </AppProviders>
   );
 }
