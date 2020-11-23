@@ -19,7 +19,6 @@ function Slugs() {
         if (loading) return <div>Fetching..</div>;
         if (error) return <div>Error...</div>;
 
-        console.log('[query]', data);
         return (
           <div>
             {data.getSlugs.map((item) => (

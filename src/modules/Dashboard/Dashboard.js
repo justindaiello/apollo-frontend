@@ -50,13 +50,11 @@ function Dashboard() {
    * @param {Function} callback - mutation method that gets run if validations clear
    */
   async function parseUrl(e, callback) {
-    console.log('running');
     e.preventDefault();
     setFormError('');
 
     // Set error if there is no baseUrl
     if (isEmpty(formValues.baseUrl)) {
-      console.log('[hit 1]');
       return setFormError('A valid URL is required');
     }
 
@@ -66,7 +64,6 @@ function Dashboard() {
       !isEmpty(allSlugs) &&
       checkForDuplicate(allSlugs, formValues.name)
     ) {
-      console.log('[hit 2]');
       return setFormError('This name already exists');
     }
 
@@ -75,13 +72,11 @@ function Dashboard() {
       !isEmpty(formValues.name) &&
       !checkForDuplicate(allSlugs, formValues.name)
     ) {
-      console.log('[hit 3]');
       setParsedUrl(parseName(`${prefix}${formValues.name}`));
       return await callback();
     }
 
     // Submit form if there is just a baseUrl value
-    console.log('[hit 4]');
     setParsedUrl(`${prefix}${randomizer()}`);
     return await callback();
   }
@@ -97,8 +92,6 @@ function Dashboard() {
       return { ...prevState, [name]: value };
     });
   }
-
-  console.log(allSlugs);
 
   return (
     <StyledDashboardWrapper>
