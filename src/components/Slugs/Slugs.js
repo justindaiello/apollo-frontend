@@ -1,8 +1,8 @@
-import React from "react";
-import { Query } from "react-apollo";
-import gql from "graphql-tag";
+import React from 'react';
+import { Query } from 'react-apollo';
+import gql from 'graphql-tag';
 
-const SLUG_QUERY = gql`
+export const SLUG_QUERY = gql`
   query {
     getSlugs {
       id
@@ -17,18 +17,13 @@ function Slugs() {
     <Query query={SLUG_QUERY}>
       {({ loading, error, data }) => {
         if (loading) return <div>Fetching..</div>;
-        if (error)
-          return (
-            <div>
-              {console.log("[error]", error)}
-              Error
-            </div>
-          );
+        if (error) return <div>Error...</div>;
 
+        console.log('[query]', data);
         return (
           <div>
             {data.getSlugs.map((item) => (
-              <div key={item.id}>{item.name}</div>
+              <div key={item.id}>{item.baseUrl}</div>
             ))}
           </div>
         );

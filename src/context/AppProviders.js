@@ -1,20 +1,20 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { ApolloClient } from "apollo-client";
-import { ApolloProvider } from "react-apollo";
-import { ThemeProvider } from "styled-components";
-import { HttpLink } from "apollo-link-http";
-import { InMemoryCache } from "apollo-cache-inmemory";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { ApolloClient } from 'apollo-boost';
+import { ApolloProvider } from 'react-apollo';
+import { ThemeProvider } from 'styled-components';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
 
-import theme from "../styles/theme";
-import GlobalStyle from "../styles/Global.styled";
-import StyledAppWrapper from "../styles/Layout.styled";
+import theme from '../styles/theme';
+import GlobalStyle from '../styles/Global.styled';
+import StyledAppWrapper from '../styles/Layout.styled';
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: "https://8d92p.sse.codesandbox.io/"
+    uri: 'https://8d92p.sse.codesandbox.io/',
   }),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
 });
 
 function AppProviders({ children }) {
@@ -31,8 +31,8 @@ function AppProviders({ children }) {
 AppProviders.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ])
+    PropTypes.node,
+  ]),
 };
 
 export default AppProviders;

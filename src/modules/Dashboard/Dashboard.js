@@ -1,61 +1,60 @@
-import React, { useState, useRef } from "react";
-// import gql from "graphql-tag";
-// import { Mutataion } from "react-apollo";
+import React, { useState, useRef } from 'react';
+import { isEmpty } from 'ramda';
+import { Mutation } from 'react-apollo';
 
-import Button from "../../components/Button";
-import SlugForm from "../../components/SlugForm";
+import Button from '../../components/Button';
+import SlugForm from '../../components/SlugForm';
+import { CREATE_SLUG_MUTATION, SLUG_QUERY } from './resolvers';
 import {
   StyledDashboardWrapper,
   StyledDashBoardCard,
-  StyledLinkDisplay
-} from "./Dashboard.styled";
+  StyledLinkDisplay,
+} from './Dashboard.styled';
+import { parseName, randomizer, checkForDuplicate } from './functions';
 
-// const CREATE_SLUG_MUTATION = gql`
-//   mutation CREATE_SLUG_MUTATION($name: String!, $baseUrl: String!) {
-//     createSlug(name: $name, $baseUrl: $baseUrl) {
-//       id
-//       name
-//       baseUrl
-//     }
-//   }
-// `;
+const prefix = 'new.url/';
 
 function Dashboard() {
   const [formValues, setFormValues] = useState({
-    name: "",
-    url: ""
+    name: '',
+    baseUrl: '',
   });
-  const [parsedUrl, setParsedUrl] = useState("");
-  const [error, setError] = useState("");
+  const [parsedUrl, setParsedUrl] = useState('');
+  const [formError, setFormError] = useState('');
+  const [allSlugs, setAllSlugs] = useState([]);
   const parsedUrlRef = useRef(null);
 
   function copyToClipBoard() {
     parsedUrlRef.current.select();
-    return document.execCommand("copy");
+    return document.execCommand('copy');
   }
 
-  function randomizer() {
-    return Math.random()
-      .toString(36)
-      .replace(/[^a-z]+/g, "")
-      .substr(0, 5);
-  }
-
-  function parseUrl(e) {
+  async function parseUrl(e, callback) {
     e.preventDefault();
-    setError("");
+    setFormError('');
 
-    const prefix = "https://mynewUrl";
-
-    if (!formValues.url) {
-      setError("A valid URL is required");
+    if (isEmpty(formValues.baseUrl)) {
+      return setFormError('A valid URL is required');
     }
 
-    if (!!formValues.name) {
-      return setParsedUrl(`${prefix}/${formValues.name}`);
+    if (
+      !isEmpty(formValues.name) &&
+      !isEmpty(allSlugs) &&
+      !checkForDuplicate(allSlugs, formValues.name)
+    ) {
+      return setFormError('This name already exists');
     }
 
-    return setParsedUrl(`${prefix}/${randomizer()}`);
+    if (
+      !isEmpty(formValues.name) &&
+      !checkForDuplicate(allSlugs, formValues.name)
+    ) {
+      setParsedUrl(parseName(`${prefix}${formValues.name}`));
+      await callback();
+    }
+
+    setParsedUrl(`${prefix}${randomizer()}`);
+    return await callback();
   }
 
   function handleChange(e) {
@@ -70,15 +69,35 @@ function Dashboard() {
     <StyledDashboardWrapper>
       <StyledDashBoardCard>
         <h1>Shorten Your URL</h1>
-        <SlugForm
-          error={error}
-          handleChange={handleChange}
-          formValues={formValues}
-          handleSubmit={parseUrl}
-        />
-        {!!parsedUrl && (
+        <Mutation
+          mutation={CREATE_SLUG_MUTATION}
+          variables={{
+            name: formValues.name,
+            baseUrl: parsedUrl,
+          }}
+          refetchQueries={[{ query: SLUG_QUERY }]}
+          update={(cache) => {
+            const currentLinks = cache.readQuery({ query: SLUG_QUERY });
+            setAllSlugs(currentLinks.getSlugs);
+          }}
+        >
+          {(createSlug, { loading }) => {
+            return (
+              <SlugForm
+                loading={loading}
+                error={formError}
+                handleChange={handleChange}
+                formValues={formValues}
+                handleSubmit={async (e) => {
+                  parseUrl(e, createSlug);
+                }}
+              />
+            );
+          }}
+        </Mutation>
+        {!isEmpty(parsedUrl) && (
           <StyledLinkDisplay>
-            <p>{`Original URL: ${formValues.url}`}</p>
+            <p>{`Original URL: ${formValues.baseUrl}`}</p>
             <p>New Url:</p>
             <textarea readOnly rows={1} ref={parsedUrlRef} value={parsedUrl} />
 

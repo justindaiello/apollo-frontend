@@ -1,11 +1,12 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import { isEmpty } from 'ramda';
+import PropTypes from 'prop-types';
 
-import Input from "../Input";
-import Button from "../Button";
-import { StyledFormWrapper } from "./SlugForm.styled";
+import Input from '../Input';
+import Button from '../Button';
+import { StyledFormWrapper } from './SlugForm.styled';
 
-function SlugForm({ handleSubmit, handleChange, formValues, error }) {
+function SlugForm({ handleSubmit, handleChange, formValues, error, loading }) {
   return (
     <StyledFormWrapper onSubmit={handleSubmit}>
       <div>
@@ -19,26 +20,29 @@ function SlugForm({ handleSubmit, handleChange, formValues, error }) {
         />
       </div>
       <div>
-        <label htmlFor="url">Enter your link:</label>
+        <label htmlFor="baseUrl">Enter your link:</label>
         <Input
           onChange={handleChange}
-          name="url"
-          id="url"
-          value={formValues.url}
+          name="baseUrl"
+          id="baseUrl"
+          value={formValues.baseUrl}
           placeholder="Enter your url"
         />
-        {!!error && <span>{error}</span>}
+        {!isEmpty(error) && <span>{error}</span>}
       </div>
-      <Button type="submit">Shorten URL</Button>
+      <Button type="submit" disabled={loading}>
+        Shorten URL
+      </Button>
     </StyledFormWrapper>
   );
 }
 
 SlugForm.propTypes = {
+  loading: PropTypes.bool,
   error: PropTypes.string,
   formValues: PropTypes.object,
   handleSubmit: PropTypes.func,
-  handleChange: PropTypes.func
+  handleChange: PropTypes.func,
 };
 
 export default SlugForm;
