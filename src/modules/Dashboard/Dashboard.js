@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { isEmpty } from 'ramda';
 import { Mutation } from 'react-apollo';
 
@@ -7,10 +7,15 @@ import SlugForm from '../../components/SlugForm';
 import { CREATE_SLUG_MUTATION, SLUG_QUERY } from './resolvers';
 import {
   StyledDashboardWrapper,
-  StyledDashBoardCard,
-  StyledLinkDisplay,
+  StyledDashboardCard,
+  StyledLinkItem,
 } from './Dashboard.styled';
-import { parseName, randomizer, checkForDuplicate } from './functions';
+import {
+  parseName,
+  randomizer,
+  checkForDuplicate,
+  copyToClipBoard,
+} from './functions';
 
 const prefix = 'new.url/';
 
@@ -22,41 +27,69 @@ function Dashboard() {
   const [parsedUrl, setParsedUrl] = useState('');
   const [formError, setFormError] = useState('');
   const [allSlugs, setAllSlugs] = useState([]);
-  const parsedUrlRef = useRef(null);
+  const [copied, setCopied] = useState(false);
 
-  function copyToClipBoard() {
-    parsedUrlRef.current.select();
-    return document.execCommand('copy');
-  }
+  /**
+   * Fade copied to clipboard text back out of view
+   */
+  useEffect(() => {
+    const timeout = copied
+      ? setTimeout(() => {
+          setCopied(false);
+        }, 2000)
+      : null;
 
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [copied]);
+
+  /**
+   * Validate and submit form
+   * @param {Object} e - event object
+   * @param {Function} callback - mutation method that gets run if validations clear
+   */
   async function parseUrl(e, callback) {
+    console.log('running');
     e.preventDefault();
     setFormError('');
 
+    // Set error if there is no baseUrl
     if (isEmpty(formValues.baseUrl)) {
+      console.log('[hit 1]');
       return setFormError('A valid URL is required');
     }
 
+    // Set error if the name value already exists in the DB
     if (
       !isEmpty(formValues.name) &&
       !isEmpty(allSlugs) &&
-      !checkForDuplicate(allSlugs, formValues.name)
+      checkForDuplicate(allSlugs, formValues.name)
     ) {
+      console.log('[hit 2]');
       return setFormError('This name already exists');
     }
 
+    // Submit form if there is a name value
     if (
       !isEmpty(formValues.name) &&
       !checkForDuplicate(allSlugs, formValues.name)
     ) {
+      console.log('[hit 3]');
       setParsedUrl(parseName(`${prefix}${formValues.name}`));
-      await callback();
+      return await callback();
     }
 
+    // Submit form if there is just a baseUrl value
+    console.log('[hit 4]');
     setParsedUrl(`${prefix}${randomizer()}`);
     return await callback();
   }
 
+  /**
+   * Handle change for both form inputs and update state
+   * @param {Object} e - event object that we de-structure value and name from
+   */
   function handleChange(e) {
     const { value, name } = e.target;
 
@@ -65,9 +98,11 @@ function Dashboard() {
     });
   }
 
+  console.log(allSlugs);
+
   return (
     <StyledDashboardWrapper>
-      <StyledDashBoardCard>
+      <StyledDashboardCard>
         <h1>Shorten Your URL</h1>
         <Mutation
           mutation={CREATE_SLUG_MUTATION}
@@ -78,7 +113,7 @@ function Dashboard() {
           refetchQueries={[{ query: SLUG_QUERY }]}
           update={(cache) => {
             const currentLinks = cache.readQuery({ query: SLUG_QUERY });
-            setAllSlugs(currentLinks.getSlugs);
+            !!currentLinks && setAllSlugs(currentLinks.getSlugs);
           }}
         >
           {(createSlug, { loading }) => {
@@ -95,16 +130,21 @@ function Dashboard() {
             );
           }}
         </Mutation>
-        {!isEmpty(parsedUrl) && (
-          <StyledLinkDisplay>
-            <p>{`Original URL: ${formValues.baseUrl}`}</p>
-            <p>New Url:</p>
-            <textarea readOnly rows={1} ref={parsedUrlRef} value={parsedUrl} />
-
-            <Button onClick={copyToClipBoard}>Copy</Button>
-          </StyledLinkDisplay>
-        )}
-      </StyledDashBoardCard>
+        <StyledLinkItem isVisible={!isEmpty(parsedUrl)}>
+          <p>{formValues.baseUrl}</p>
+          <p>{parsedUrl}</p>
+          <Button
+            blank
+            onClick={() => {
+              copyToClipBoard(parsedUrl);
+              return setCopied(true);
+            }}
+          >
+            Copy
+          </Button>
+          {copied && <span copied={copied}>Copied to Clipboard</span>}
+        </StyledLinkItem>
+      </StyledDashboardCard>
     </StyledDashboardWrapper>
   );
 }

@@ -10,23 +10,23 @@ function SlugForm({ handleSubmit, handleChange, formValues, error, loading }) {
   return (
     <StyledFormWrapper onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="url">Enter Link Name (optional)</label>
+        <label htmlFor="url">Enter Link Alias (optional)</label>
         <Input
           onChange={handleChange}
           name="name"
           id="name"
           value={formValues.name}
-          placeholder="Enter link name"
+          placeholder="Enter an Alias"
         />
       </div>
       <div>
-        <label htmlFor="baseUrl">Enter your link:</label>
+        <label htmlFor="baseUrl">Enter Your Link:</label>
         <Input
           onChange={handleChange}
           name="baseUrl"
           id="baseUrl"
           value={formValues.baseUrl}
-          placeholder="Enter your url"
+          placeholder="Enter your URL"
         />
         {!isEmpty(error) && <span>{error}</span>}
       </div>

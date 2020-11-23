@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const StyledFormWrapper = styled.form`
   display: block;
@@ -21,12 +21,16 @@ export const StyledFormWrapper = styled.form`
   }
 
   button {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     align-self: center;
+
+    @media (max-width: 700px) {
+      width: 100%;
+    }
   }
 
   span {
-    color: red;
+    color: ${({ theme }) => theme.danger};
     position: absolute;
     top: 70px;
   }
